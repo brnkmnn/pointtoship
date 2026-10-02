@@ -45,13 +45,13 @@ them can be swapped.
 ## Install
 
 ```bash
-npx skills add OWNER/pointtoship
+npx skills add brnkmnn/pointtoship
 ```
 
 or with the GitHub CLI:
 
 ```bash
-gh skill install OWNER/pointtoship
+gh skill install brnkmnn/pointtoship
 ```
 
 Then tell your agent: **set up PointToShip**.
