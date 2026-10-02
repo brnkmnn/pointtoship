@@ -1,0 +1,569 @@
+<title>PointToShip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column with wide inserts (diagrams, tables, the pointer
+   sample); the selection outline of the feedback overlay is the accent. */
+:root {
+  --bg: #f3f4f1;
+  --paper: #fbfbf9;
+  --lane: #e8eae5;
+  --fg: #16181c;
+  --muted: #5d636b;
+  --rule: #d6d9d3;
+  --accent: #2f5bff;        /* the outline drawn round what you point at */
+  --accent-soft: rgba(47, 91, 255, .08);
+  --ok: #2f7a4a;
+  --warn: #b5452c;
+  --display: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --step--1: .86rem; --step-0: 1.06rem; --step-1: 1.3rem; --step-2: 1.7rem; --step-3: 2.4rem; --step-4: 3.4rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121418; --paper: #1b1e24; --lane: #16191e; --fg: #e9eae6; --muted: #9aa0a8; --rule: #2e333b;
+    --accent: #7d97ff; --accent-soft: rgba(125, 151, 255, .12); --ok: #6cc08d; --warn: #ef8b72;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121418; --paper: #1b1e24; --lane: #16191e; --fg: #e9eae6; --muted: #9aa0a8; --rule: #2e333b;
+  --accent: #7d97ff; --accent-soft: rgba(125, 151, 255, .12); --ok: #6cc08d; --warn: #ef8b72;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: var(--step-0); line-height: 1.6; padding-inline: 20px; padding-block: 0 80px; }
+main { max-width: 720px; margin: 0 auto; }
+.wide { max-width: 980px; margin-inline: auto; }
+/* Wider than the reading column, centred on the page. */
+.bleed { width: min(980px, calc(100vw - 40px)); margin-left: 50%; transform: translateX(-50%); }
+h1, h2, h3 { font-family: var(--display); line-height: 1.12; text-wrap: balance; letter-spacing: -.01em; }
+h1 { font-size: var(--step-4); margin: 0; font-weight: 700; }
+h2 { font-size: var(--step-2); margin: 3.2rem 0 .8rem; font-weight: 700; }
+h3 { font-size: var(--step-1); margin: 2rem 0 .5rem; font-weight: 500; }
+p { margin: 0 0 1rem; }
+a { color: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.label { font-family: var(--display); font-size: var(--step--1); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+header { max-width: 980px; margin: 0 auto; padding: 56px 0 28px; border-bottom: 1px solid var(--rule); }
+header .lede { font-size: var(--step-1); max-width: 40rem; margin-top: 1rem; }
+/* The one device borrowed from the subject: a selection outline. */
+.pointed { outline: 2px solid var(--accent); outline-offset: 4px; background: var(--accent-soft); border-radius: 3px; padding: 14px 16px; margin: 1.2rem 0; }
+.pointed > .label { color: var(--accent); display: block; margin-bottom: .3rem; }
+ol.steps, ul.plain { padding-left: 1.2rem; margin: 0 0 1rem; }
+ol.steps li, ul.plain li { margin-bottom: .45rem; }
+.parts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 12px; margin: 1.2rem 0; }
+.part { background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; min-width: 0; }
+.part h3 { margin: .2rem 0 .4rem; font-size: var(--step-0); font-weight: 700; }
+.part p { font-size: var(--step--1); margin: 0; color: var(--muted); }
+.part .label { color: var(--accent); }
+.scroll { overflow-x: auto; margin: 1.2rem 0; }
+table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: var(--step--1); }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--rule); }
+th { font-family: var(--display); font-weight: 700; }
+td:first-child { font-family: var(--display); font-weight: 500; white-space: nowrap; }
+.pick { color: var(--accent); font-family: var(--display); font-size: var(--step--1); white-space: nowrap; }
+pre.code { background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; overflow-x: auto; font-family: var(--mono); font-size: .8rem; line-height: 1.55; }
+.layers { counter-reset: layer; list-style: none; padding: 0; margin: 1rem 0; display: grid; gap: 8px; }
+.layers li { counter-increment: layer; display: grid; grid-template-columns: 2.2rem 1fr; gap: 10px; align-items: baseline; }
+.layers li::before { content: counter(layer); font-family: var(--display); font-weight: 700; color: var(--accent); font-size: var(--step-1); }
+.layers b { font-family: var(--display); }
+.note { font-size: var(--step--1); color: var(--muted); }
+.decision { border-left: 3px solid var(--accent); padding: 4px 0 4px 14px; margin: 1rem 0; }
+.decision p { margin: .2rem 0; }
+.decision .q { font-family: var(--display); font-weight: 700; }
+.result { background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; padding: 16px 18px; margin: 1.2rem 0; font-size: var(--step--1); }
+.result-head { font-family: var(--display); font-weight: 700; font-size: var(--step-0); margin-bottom: .6rem; }
+.result ul { margin: 0 0 .8rem; padding-left: 1.1rem; }
+.result li { margin-bottom: .3rem; }
+.result p:last-child { margin: 0; }
+.result-link { font-family: var(--mono); color: var(--accent); overflow-wrap: anywhere; }
+footer { max-width: 720px; margin: 4rem auto 0; padding-top: 1rem; border-top: 1px solid var(--rule); font-size: var(--step--1); color: var(--muted); }
+footer li { margin-bottom: .3rem; }
+
+/* Figures */
+figure { margin: 1.6rem 0; }
+figcaption { font-size: var(--step--1); color: var(--muted); margin: .7rem auto 0; max-width: 720px; }
+.diagram { overflow-x: auto; }
+.diagram svg { display: block; width: 100%; height: auto; min-width: 680px; }
+.compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 12px; }
+.compare > div { min-width: 0; border: 1px solid var(--rule); border-radius: 6px; padding: 10px 12px 4px; }
+.compare .label { display: block; }
+.compare .sub { display: block; font-size: var(--step--1); color: var(--muted); margin-bottom: .2rem; }
+.compare > div:last-child .label { color: var(--accent); }
+.compare svg { display: block; width: 100%; height: auto; }
+
+/* Inline diagrams draw only with theme tokens. */
+.dg text { font-family: var(--display); font-size: 12px; fill: var(--fg); }
+.dg .lane { fill: var(--lane); }
+.dg .card { fill: var(--paper); stroke: var(--rule); stroke-width: 1; }
+.dg .rule { stroke: var(--rule); stroke-width: 1; fill: none; }
+.dg .bar { fill: var(--rule); }
+.dg .ink { fill: var(--muted); opacity: .5; }
+.dg .stroke-ink { stroke: var(--muted); stroke-width: 2; stroke-linecap: round; fill: none; }
+.dg .btn { fill: var(--warn); }
+.dg .sel { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.dg .bubble { fill: var(--paper); stroke: var(--accent); stroke-width: 1.5; }
+.dg .pill { fill: var(--bg); stroke: var(--rule); stroke-width: 1; }
+.dg .acc-line { stroke: var(--accent); stroke-width: 1.5; fill: none; }
+.dg .acc-dash { stroke: var(--accent); stroke-width: 1.2; stroke-dasharray: 3 3; fill: none; }
+.dg .cursor { fill: var(--fg); stroke: var(--paper); stroke-width: 1; }
+.dg .badge { fill: var(--accent); }
+.dg .arrow { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+.dg .arrow.dash { stroke-dasharray: 4 4; }
+.dg .ah { fill: var(--muted); }
+.dg .lead { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; fill: none; }
+.dg text.lbl { font-size: 10.5px; letter-spacing: .08em; fill: var(--muted); }
+.dg text.name { font-size: 14px; font-weight: 700; }
+.dg text.cap { font-size: 12.5px; text-anchor: middle; }
+.dg text.mono { font-family: var(--mono); font-size: 11px; }
+.dg text.note { font-family: var(--body); font-style: italic; font-size: 11.5px; }
+.dg text.small { font-size: 10.5px; fill: var(--muted); }
+.dg text.s11 { font-size: 11px; }
+.dg text.s115 { font-size: 11.5px; }
+.dg text.btn-t { fill: var(--paper); font-size: 10px; text-anchor: middle; }
+.dg text.badge-t { fill: var(--paper); font-size: 11px; font-weight: 700; text-anchor: middle; }
+.dg text.alabel { font-size: 11px; fill: var(--muted); text-anchor: middle; paint-order: stroke; stroke: var(--bg); stroke-width: 5px; stroke-linejoin: round; }
+.dg text.alabel.start { text-anchor: start; }
+.dg text.q { font-size: 13px; fill: var(--muted); }
+.dg text.q.end { text-anchor: end; }
+.dg text.q.i { font-family: var(--body); font-style: italic; }
+.dg text.qm { font-family: var(--mono); font-size: 12px; fill: var(--muted); text-anchor: end; }
+.dg text.say { font-size: 13px; }
+.dg .m { fill: var(--muted); }
+.dg .ok { fill: var(--ok); }
+.dg .warn { fill: var(--warn); }
+.dg .acc { fill: var(--accent); }
+.dg .b { font-weight: 700; }
+
+@media (max-width: 560px) { h1 { font-size: var(--step-3); } h2 { font-size: var(--step-1); } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<header>
+  <h1>PointToShip</h1>
+  <p class="lede">Point at something on your live website, say what should change, and an agent works it, ships it and reports back on the page. Show takes you straight to the result.</p>
+</header>
+
+
+<main>
+
+<h2 id="why">Why</h2>
+<p>Much of front-end work is saying which thing you mean. Is it the sidebar or the side menu? The burger menu? The footer, or the whole section above it? Is that button the call to action? And when an AI wrote the page, you may never have learned what its parts are called.</p>
+<p>So you risk a misunderstanding, or you spend effort describing: retyping the headline, guessing the file, taking a screenshot. More and more agents run on a headless machine or in the cloud, where a screenshot is one more thing to hand over.</p>
+
+<figure class="bleed">
+  <div class="compare">
+    <div>
+      <span class="label">Naming it</span>
+      <span class="sub">You need to know what it is called, or describe it.</span>
+      <svg class="dg" viewBox="0 0 520 230" role="img" aria-label="Naming it: the page described the way people talk about it. That menu in the corner, I mean the burger; the call to action in red that says Contact us; the photo with the guy on the phone, but not the first one.">
+        <rect class="card" x="150" y="20" width="200" height="190" rx="8"/>
+        <line class="rule" x1="150" y1="44" x2="350" y2="44"/>
+        <rect class="ink" x="160" y="28" width="30" height="8" rx="2"/>
+        <path class="stroke-ink" d="M326 27h14M326 32h14M326 37h14"/>
+        <rect class="lane" x="151" y="45" width="49" height="131"/>
+        <rect class="bar" x="160" y="58" width="30" height="4" rx="2"/>
+        <rect class="bar" x="160" y="70" width="30" height="4" rx="2"/>
+        <rect class="bar" x="160" y="82" width="30" height="4" rx="2"/>
+        <rect class="ink" x="210" y="56" width="90" height="10" rx="2"/>
+        <rect class="bar" x="210" y="74" width="126" height="4" rx="2"/>
+        <rect class="bar" x="210" y="82" width="100" height="4" rx="2"/>
+        <rect class="btn" x="210" y="96" width="56" height="18" rx="3"/>
+        <text class="btn-t" x="238" y="108" style="font-size:9px">Contact us</text>
+        <rect class="bar" x="210" y="128" width="40" height="36" rx="3"/>
+        <rect class="bar" x="254" y="128" width="40" height="36" rx="3"/>
+        <rect class="bar" x="298" y="128" width="40" height="36" rx="3"/>
+        <circle class="ink" cx="228" cy="140" r="4"/><path class="ink" d="M220 164v-8a8 8 0 0 1 16 0v8Z"/><rect class="ink" x="234" y="137" width="3.5" height="7" rx="1"/>
+        <circle class="ink" cx="272" cy="140" r="4"/><path class="ink" d="M264 164v-8a8 8 0 0 1 16 0v8Z"/><rect class="ink" x="278" y="137" width="3.5" height="7" rx="1"/>
+        <path class="ink" d="M302 164L313 147L320 156L326 150L334 164Z"/>
+        <path class="lane" d="M151 176H349V202a7 7 0 0 1-7 7H158a7 7 0 0 1-7-7Z"/>
+        <line class="rule" x1="150" y1="176" x2="350" y2="176"/>
+
+        <path class="lead" d="M343 37L360 42"/>
+        <text class="q i" x="364" y="38">“that menu in the corner,</text>
+        <text class="q i" x="364" y="54">I mean the burger”</text>
+        <path class="lead" d="M268 105H358"/>
+        <text class="q i" x="364" y="102">“the call to action in red</text>
+        <text class="q i" x="364" y="118">that says ‘Contact us’”</text>
+        <path class="lead" d="M274 165V170H358"/>
+        <text class="q i" x="364" y="166">“the photo with the guy</text>
+        <text class="q i" x="364" y="182">on the phone, but not</text>
+        <text class="q i" x="364" y="198">the first one”</text>
+      </svg>
+    </div>
+    <div>
+      <span class="label">Pointing at it</span>
+      <span class="sub">It does not matter what it is called.</span>
+      <svg class="dg" viewBox="0 0 520 230" role="img" aria-label="Pointing at it: the button is outlined and the comment says Change text to Book now. The pointer carries its text, place, size and style, and the page.">
+        <rect class="card" x="150" y="20" width="200" height="190" rx="8"/>
+        <line class="rule" x1="150" y1="44" x2="350" y2="44"/>
+        <rect class="ink" x="160" y="28" width="30" height="8" rx="2"/>
+        <path class="stroke-ink" d="M326 27h14M326 32h14M326 37h14"/>
+        <rect class="lane" x="151" y="45" width="49" height="131"/>
+        <rect class="bar" x="160" y="58" width="30" height="4" rx="2"/>
+        <rect class="bar" x="160" y="70" width="30" height="4" rx="2"/>
+        <rect class="bar" x="160" y="82" width="30" height="4" rx="2"/>
+        <rect class="ink" x="210" y="56" width="90" height="10" rx="2"/>
+        <rect class="bar" x="210" y="74" width="126" height="4" rx="2"/>
+        <rect class="bar" x="210" y="82" width="100" height="4" rx="2"/>
+        <rect class="sel" x="205" y="91" width="66" height="28" rx="5"/>
+        <rect class="btn" x="210" y="96" width="56" height="18" rx="3"/>
+        <text class="btn-t" x="238" y="108" style="font-size:9px">Contact us</text>
+        <rect class="bar" x="210" y="128" width="40" height="36" rx="3"/>
+        <rect class="bar" x="254" y="128" width="40" height="36" rx="3"/>
+        <rect class="bar" x="298" y="128" width="40" height="36" rx="3"/>
+        <circle class="ink" cx="228" cy="140" r="4"/><path class="ink" d="M220 164v-8a8 8 0 0 1 16 0v8Z"/><rect class="ink" x="234" y="137" width="3.5" height="7" rx="1"/>
+        <circle class="ink" cx="272" cy="140" r="4"/><path class="ink" d="M264 164v-8a8 8 0 0 1 16 0v8Z"/><rect class="ink" x="278" y="137" width="3.5" height="7" rx="1"/>
+        <path class="ink" d="M302 164L313 147L320 156L326 150L334 164Z"/>
+        <path class="lane" d="M151 176H349V202a7 7 0 0 1-7 7H158a7 7 0 0 1-7-7Z"/>
+        <line class="rule" x1="150" y1="176" x2="350" y2="176"/>
+        <polygon class="cursor" points="252,110 252,128 256.5,123.5 260,131 263,129.5 259.5,122 266,122"/>
+
+        <path class="acc-line" d="M271 105H362"/>
+        <rect class="bubble" x="362" y="82" width="132" height="46" rx="6"/>
+        <text class="say" x="374" y="101">Change text to</text>
+        <text class="say" x="374" y="119">“Book now”</text>
+
+        <text class="qm" x="132" y="70">its text</text>
+        <text class="qm" x="132" y="88">its place</text>
+        <text class="qm" x="132" y="106">its size</text>
+        <text class="qm" x="132" y="124">its style</text>
+        <text class="qm" x="132" y="142">the page</text>
+        <path class="acc-dash" d="M138 60V146M138 105H205"/>
+      </svg>
+    </div>
+  </div>
+  <figcaption>Left: without a name for it, you describe it. Right: one click on the thing itself.</figcaption>
+</figure>
+
+<p>Pointing makes the name unnecessary. The click captures the element itself: its text, where it sits, its size and style, and the state of the page. That is more than a screenshot holds. It works for back-end work that shows on the page too: a wrong price, a missing entry, a form that refuses good input.</p>
+<p>And everything stays on the page. You comment where you saw it, the status comes back there, and the change appears there, on a laptop, a desktop or a phone. No switching to another tab.</p>
+
+<h2 id="how">How it works</h2>
+<p>You notice something while looking at your site. You click it, type one sentence and keep browsing. The rest runs without you, and the result comes back to where you started.</p>
+
+<figure class="bleed">
+  <div class="diagram">
+    <svg class="dg" viewBox="0 0 880 450" role="img" aria-label="The loop in eight steps across four parts. On the site you point and say what should change; your tracker gets an issue with the comment and the pointer; the runner checks it and starts an agent; the agent follows the method skill. Back the other way: the agent commits and writes two or three sentences; the runner checks the files and pushes, and the host deploys; the issue keeps the record; status and Show come back to the page.">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+      </defs>
+
+      <rect class="lane" x="10" y="0" width="200" height="450" rx="10"/>
+      <rect class="lane" x="230" y="0" width="200" height="450" rx="10"/>
+      <rect class="lane" x="450" y="0" width="200" height="450" rx="10"/>
+      <rect class="lane" x="670" y="0" width="200" height="450" rx="10"/>
+      <text class="lbl" x="35" y="24">ON THE SITE</text><text class="name" x="35" y="44">One script tag</text>
+      <text class="lbl" x="255" y="24">THE QUEUE</text><text class="name" x="255" y="44">Your tracker</text>
+      <text class="lbl" x="475" y="24">THE RUNNER</text><text class="name" x="475" y="44">Whatever watches it</text>
+      <text class="lbl" x="695" y="24">THE METHOD</text><text class="name" x="695" y="44">An Agent Skill</text>
+
+      <!-- 1 Point -->
+      <rect class="card" x="35" y="64" width="150" height="130" rx="6"/>
+      <line class="rule" x1="35" y1="80" x2="185" y2="80"/>
+      <circle class="bar" cx="55" cy="72" r="2.2"/><circle class="bar" cx="62" cy="72" r="2.2"/><circle class="bar" cx="69" cy="72" r="2.2"/>
+      <rect class="ink" x="47" y="90" width="80" height="8" rx="2"/>
+      <rect class="bar" x="47" y="104" width="126" height="4" rx="2"/>
+      <rect class="bar" x="47" y="112" width="100" height="4" rx="2"/>
+      <rect class="sel" x="43" y="122" width="84" height="26" rx="4"/>
+      <rect class="btn" x="47" y="126" width="76" height="18" rx="3"/>
+      <text class="btn-t" x="85" y="139">Contact us</text>
+      <polygon class="badge" points="100,153 110,153 98,146"/>
+      <rect class="bubble" x="88" y="153" width="92" height="35" rx="5"/>
+      <text class="s11" x="96" y="167">Change text to</text>
+      <text class="s11" x="96" y="181">“Book now”</text>
+      <text class="cap" x="110" y="216">You point and say</text>
+      <text class="cap" x="110" y="231">what should change</text>
+
+      <!-- 2 Issue -->
+      <rect class="card" x="255" y="64" width="150" height="130" rx="6"/>
+      <text class="s11" x="267" y="84"><tspan class="acc b">#12</tspan> Change text to</text>
+      <text class="s11" x="267" y="98">“Book now”</text>
+      <line class="rule" x1="267" y1="106" x2="393" y2="106"/>
+      <text class="mono" x="267" y="122"><tspan class="m">text</tspan><tspan x="303">Contact us</tspan></text>
+      <text class="mono" x="267" y="137"><tspan class="m">near</tspan><tspan x="303">Pricing</tspan></text>
+      <text class="mono" x="267" y="152"><tspan class="m">page</tspan><tspan x="303">/pricing</tspan></text>
+      <text class="mono" x="267" y="167"><tspan class="m">view</tspan><tspan x="303">1512×857</tspan></text>
+      <text class="small" x="267" y="184">opened by your site</text>
+      <text class="cap" x="330" y="216">An issue holds the</text>
+      <text class="cap" x="330" y="231">comment and pointer</text>
+
+      <!-- 3 Runner -->
+      <rect class="card" x="475" y="64" width="150" height="130" rx="6"/>
+      <text class="small" x="487" y="86">CI or your computer</text>
+      <line class="rule" x1="487" y1="96" x2="613" y2="96"/>
+      <circle class="ok" cx="492" cy="112" r="3.5"/><text class="mono" x="502" y="116">issue #12</text>
+      <circle class="ok" cx="492" cy="132" r="3.5"/><text class="mono" x="502" y="136">author ok</text>
+      <circle class="ok" cx="492" cy="152" r="3.5"/><text class="mono" x="502" y="156">fresh sandbox</text>
+      <circle class="acc" cx="492" cy="172" r="3.5"/><text class="mono" x="502" y="176">agent started</text>
+      <text class="cap" x="550" y="216">The runner checks</text>
+      <text class="cap" x="550" y="231">and starts an agent</text>
+
+      <!-- 4 Method -->
+      <path class="card" d="M701 64H825L845 84V188a6 6 0 0 1-6 6H701a6 6 0 0 1-6-6V70a6 6 0 0 1 6-6Z"/>
+      <path class="rule" d="M825 64V84H845"/>
+      <text class="mono b" x="707" y="86">SKILL.md</text>
+      <line class="rule" x1="707" y1="96" x2="833" y2="96"/>
+      <text class="s115" x="707" y="114"><tspan class="acc b">1</tspan><tspan x="721">Find the element</tspan></text>
+      <text class="s115" x="707" y="131"><tspan class="acc b">2</tspan><tspan x="721">Change it</tspan></text>
+      <text class="s115" x="707" y="148"><tspan class="acc b">3</tspan><tspan x="721">Check the result</tspan></text>
+      <text class="s115" x="707" y="165"><tspan class="acc b">4</tspan><tspan x="721">Commit and report</tspan></text>
+      <text class="small" x="707" y="186">any agent reads it</text>
+      <text class="cap" x="770" y="216">The agent follows</text>
+      <text class="cap" x="770" y="231">the method</text>
+
+      <!-- 5 Commit -->
+      <rect class="card" x="695" y="266" width="150" height="130" rx="6"/>
+      <text class="mono m" x="707" y="288">commit a1b2c3</text>
+      <line class="rule" x1="707" y1="298" x2="833" y2="298"/>
+      <text class="mono" x="707" y="318"><tspan class="warn">−</tspan><tspan x="721">Contact us</tspan></text>
+      <text class="mono" x="707" y="336"><tspan class="ok">+</tspan><tspan x="721">Book now</tspan></text>
+      <text class="note" x="707" y="362">“Changed the button</text>
+      <text class="note" x="707" y="377">text to Book now.”</text>
+      <text class="cap" x="770" y="418">It commits and writes</text>
+      <text class="cap" x="770" y="433">two or three sentences</text>
+
+      <!-- 6 Ship -->
+      <rect class="card" x="475" y="266" width="150" height="130" rx="6"/>
+      <text class="small" x="487" y="288">before it ships</text>
+      <line class="rule" x1="487" y1="298" x2="613" y2="298"/>
+      <circle class="ok" cx="492" cy="314" r="3.5"/><text class="mono" x="502" y="318">files checked</text>
+      <circle class="ok" cx="492" cy="334" r="3.5"/><text class="mono" x="502" y="338">pushed</text>
+      <circle class="ok" cx="492" cy="354" r="3.5"/><text class="mono" x="502" y="358">host deploys</text>
+      <circle class="ok" cx="492" cy="374" r="3.5"/><text class="mono" x="502" y="378">note posted</text>
+      <text class="cap" x="550" y="418">Files checked, pushed,</text>
+      <text class="cap" x="550" y="433">the host deploys</text>
+
+      <!-- 7 Record -->
+      <rect class="card" x="255" y="266" width="150" height="130" rx="6"/>
+      <text class="s11" x="267" y="288"><tspan class="acc b">#12</tspan> <tspan class="ok b">Done</tspan></text>
+      <line class="rule" x1="267" y1="298" x2="393" y2="298"/>
+      <text class="note" x="267" y="318">“Changed the button</text>
+      <text class="note" x="267" y="333">text to Book now.”</text>
+      <text class="mono m" x="267" y="356">a1b2c3 · live</text>
+      <text class="small" x="267" y="384">mail only for questions</text>
+      <text class="cap" x="330" y="418">The issue keeps</text>
+      <text class="cap" x="330" y="433">the record</text>
+
+      <!-- 8 Show -->
+      <rect class="card" x="35" y="266" width="150" height="130" rx="6"/>
+      <line class="rule" x1="35" y1="282" x2="185" y2="282"/>
+      <circle class="bar" cx="55" cy="274" r="2.2"/><circle class="bar" cx="62" cy="274" r="2.2"/><circle class="bar" cx="69" cy="274" r="2.2"/>
+      <rect class="ink" x="47" y="292" width="80" height="8" rx="2"/>
+      <rect class="bar" x="47" y="306" width="126" height="4" rx="2"/>
+      <rect class="bar" x="47" y="314" width="100" height="4" rx="2"/>
+      <rect class="sel" x="43" y="324" width="84" height="26" rx="4"/>
+      <rect class="btn" x="47" y="328" width="76" height="18" rx="3"/>
+      <text class="btn-t" x="85" y="341">Book now</text>
+      <rect class="pill" x="47" y="362" width="126" height="24" rx="12"/>
+      <text class="s11" x="59" y="378"><tspan class="b">#12</tspan> <tspan class="ok">Done</tspan> · <tspan class="acc" text-decoration="underline">Show</tspan></text>
+      <text class="cap" x="110" y="418">Status and Show come</text>
+      <text class="cap" x="110" y="433">back to the page</text>
+
+      <!-- arrows: out along the top, back along the bottom -->
+      <line class="arrow" x1="189" y1="129" x2="249" y2="129" marker-end="url(#ah)"/>
+      <text class="alabel" x="220" y="121">new issue</text>
+      <line class="arrow" x1="409" y1="129" x2="469" y2="129" marker-end="url(#ah)"/>
+      <text class="alabel" x="440" y="121">triggers</text>
+      <line class="arrow" x1="629" y1="129" x2="689" y2="129" marker-end="url(#ah)"/>
+      <text class="alabel" x="660" y="121">runs agent</text>
+      <line class="arrow" x1="770" y1="239" x2="770" y2="261" marker-end="url(#ah)"/>
+      <text class="alabel start" x="780" y="254">works it</text>
+      <line class="arrow" x1="691" y1="331" x2="631" y2="331" marker-end="url(#ah)"/>
+      <text class="alabel" x="660" y="323">commit</text>
+      <line class="arrow" x1="471" y1="331" x2="411" y2="331" marker-end="url(#ah)"/>
+      <text class="alabel" x="440" y="323">posts note</text>
+      <line class="arrow" x1="251" y1="331" x2="191" y2="331" marker-end="url(#ah)"/>
+      <text class="alabel" x="220" y="323">status</text>
+      <line class="arrow dash" x1="110" y1="261" x2="110" y2="239" marker-end="url(#ah)"/>
+      <text class="alabel start" x="120" y="254">next comment</text>
+
+      <circle class="badge" cx="35" cy="64" r="10"/><text class="badge-t" x="35" y="68">1</text>
+      <circle class="badge" cx="255" cy="64" r="10"/><text class="badge-t" x="255" y="68">2</text>
+      <circle class="badge" cx="475" cy="64" r="10"/><text class="badge-t" x="475" y="68">3</text>
+      <circle class="badge" cx="695" cy="64" r="10"/><text class="badge-t" x="695" y="68">4</text>
+      <circle class="badge" cx="695" cy="266" r="10"/><text class="badge-t" x="695" y="270">5</text>
+      <circle class="badge" cx="475" cy="266" r="10"/><text class="badge-t" x="475" y="270">6</text>
+      <circle class="badge" cx="255" cy="266" r="10"/><text class="badge-t" x="255" y="270">7</text>
+      <circle class="badge" cx="35" cy="266" r="10"/><text class="badge-t" x="35" y="270">8</text>
+    </svg>
+  </div>
+  <figcaption>One comment, eight steps. The top row carries the comment out to the agent, the bottom row brings the change back to the page. When a change has a real downside, the agent asks instead, and the question comes back the same way, with a mail to you.</figcaption>
+</figure>
+
+<h3>Four parts, none of them tied to one app</h3>
+<p>Each part has one job and a plain interface to the next, so any of them can be swapped: another tracker, another host, another agent, another place to run.</p>
+
+<div class="parts">
+  <div class="part"><span class="label">On the site</span><h3>One script tag</h3><p>A small dot in the corner unfolds Select and Issues. Works on any site and framework. Loaded only for the owner, never for visitors.</p></div>
+  <div class="part"><span class="label">The queue</span><h3>Your tracker</h3><p>GitHub, GitLab, Linear or Jira issues. The queue and the record at once: every comment, answer and commit stays there.</p></div>
+  <div class="part"><span class="label">The runner</span><h3>Whatever watches it</h3><p>CI of the tracker, a hosted agent service, your own computer, or a small server. Starts an agent per comment.</p></div>
+  <div class="part"><span class="label">The method</span><h3>An Agent Skill</h3><p>How a comment is worked, written in the open SKILL.md format that Claude, Codex, Gemini CLI, Copilot, Cursor and many more read.</p></div>
+</div>
+
+<div class="pointed">
+  <span class="label">What exists already</span>
+  Visual feedback tools turn a click on a live site into a ticket for a human (BugHerd, Marker.io). Agent pointing tools hand a selected element to a coding agent on a local dev server (stagewise, Agentation, Vibe Annotations, Frontman). Issue agents turn an issue into a pull request (Claude Code for GitHub Actions and GitLab CI, GitHub Copilot's cloud agent). PointToShip joins the three: it starts on the live site, ends deployed, and reports back where it started.
+</div>
+
+<h2 id="pointing">Pointing</h2>
+<p>A pointer has to describe the same spot several independent ways, so that when one fails (the text was edited, the layout moved) the others still find it. The W3C Web Annotation model describes exactly this with layered selectors; annotation tools such as Hypothesis anchor their notes the same way.</p>
+
+<h3>What a pointer carries, strongest first</h3>
+<ol class="layers">
+  <li><span><b>Where it is in the code.</b> Frameworks can stamp each element with the source file and line at build time. On a public site that becomes a short code (<code>data-ps="a3f9"</code>), and only the runner holds the table from code to file. Optional, and the best signal when present.</span></li>
+  <li><span><b>What it says or shows.</b> The text with a little before and after, how it broke into lines on that screen, an image or video by file and alt text, a link by target, a button by label, the nearest heading above it.</span></li>
+  <li><span><b>Where it sits.</b> A robust CSS path and the section around it, for things without text.</span></li>
+  <li><span><b>How it looks.</b> Position, size and computed style: font, size, colour, spacing. "Too big" and "does not line up" become measurable.</span></li>
+  <li><span><b>The state of the page.</b> Address, open overlays, screen size, device, scroll position, theme. Enough for the runner to rebuild the view and take the screenshot itself, so nobody has to send one.</span></li>
+</ol>
+
+<h3>Ways to point</h3>
+<ul class="plain">
+  <li>One element, then <em>Wider</em> to its parent and its section.</li>
+  <li>A few words selected inside a paragraph.</li>
+  <li>A frame drawn round an area.</li>
+  <li>Several things at once, for "swap these" or "make these the same size".</li>
+  <li>The whole page.</li>
+</ul>
+
+<h3>A pointer, as the runner receives it</h3>
+<pre class="code">{
+  "comment": "These two belong to the bridge chapter",
+  "pointer": {
+    "kind": "row",
+    "source": ["a3f9", "a3fa"],
+    "media": ["istanbul/Meeting-07L.jpg", "istanbul/Meeting-08L.jpg"],
+    "heading": "Meetings",
+    "selector": "main section:nth-of-type(14) [data-row]",
+    "box": { "x": 0, "y": 257, "w": 1440, "h": 417 }
+  },
+  "view": { "path": "/projects/istanbul", "width": 1512, "height": 857,
+            "dpr": 2, "device": "Mac Chrome", "scroll": 17878, "theme": "light" }
+}</pre>
+
+<h3>From pointer to code</h3>
+<ol class="steps">
+  <li>A source code is there: open that file at that line.</li>
+  <li>Otherwise search the repository for the text and the file names.</li>
+  <li>Not in the repository: the content comes from a CMS or a data source, so look there.</li>
+  <li>Otherwise use the selector and the screenshot, and find it by looking.</li>
+</ol>
+<p class="note">Site adapters stay possible: a site may label its own meaningful ids (<code>data-ps-id="photo:Work-03S"</code>). Without adapters it still works, one level more generic.</p>
+
+<h2 id="runners">Runners</h2>
+<p>Easy, robust and reliable wins. The installer recommends one and explains the others.</p>
+<div class="scroll">
+  <table>
+    <thead><tr><th>Runner</th><th>Good</th><th>Watch out</th><th></th></tr></thead>
+    <tbody>
+      <tr><td>The tracker's CI</td><td>No machine of your own. Every run in a fresh, isolated container. Starts on a new issue, no polling. Ready integrations exist for Claude, Codex and others.</td><td>CI minutes beyond the free allowance (GitLab Free: 400 minutes a month, roughly 50 to 80 comments). An agent key stored in CI.</td><td class="pick">Default</td></tr>
+      <tr><td>Hosted agent service</td><td>Almost no setup (for example GitHub Copilot's cloud agent: assign the issue, get a pull request).</td><td>Bound to that service, and usually ends in a pull request for review rather than a deploy.</td><td></td></tr>
+      <tr><td>Your own computer</td><td>Free, full control, real fonts and screenshots. Sandboxed, for example with macOS sandbox-exec.</td><td>Only while the machine is on and its login is valid. A long-lived token (<code>claude setup-token</code>) instead of a normal login avoids the expiries. Use a standalone agent install, not the copy inside a desktop app, which can move when the app updates.</td><td></td></tr>
+      <tr><td>A small server</td><td>Always on, any agent.</td><td>The most upkeep: updates, logs, restarts.</td><td></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>Before every comment</h3>
+<p>Whichever runner you choose, it owns its agent: a standalone install of the agent's command-line tool, or the one in the CI image. It never borrows the copy inside a desktop app, because an app update can move that copy and the run then finds nothing. Where the runner has to look for an agent, it takes the newest one it finds, and a configured path wins over the search.</p>
+<p>Before it takes a comment, the runner checks itself: the agent starts, its login or token is valid, the tracker answers, and the deploy credentials are there.</p>
+<p>A failure on the runner's side is kept apart from a problem with the comment:</p>
+<div class="scroll">
+  <table>
+    <thead><tr><th>Where it fails</th><th>For example</th><th>What happens</th></tr></thead>
+    <tbody>
+      <tr><td>The runner</td><td>The agent is missing or moved, the login expired, the tracker is down.</td><td>The comment stays in the queue. You hear about it once, with what broke and what fixes it. The runner pauses, checks again, and goes on by itself. You are never asked for more detail.</td></tr>
+      <tr><td>The comment</td><td>Unclear, impossible, or the change has a real downside.</td><td>The agent asks you on the page, and your answer goes into the same issue.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="previews">Previews, optional</h2>
+<p>Where the host builds a preview for every branch (Vercel, Netlify, Cloudflare Pages, Render), previews cost the site nothing: the run works on its own branch, the host builds a preview, and <em>Ship it</em> merges. Hosts without previews need a staging copy, and apps with a database need data for it; there previews are real work, so the installer only offers them where they are cheap and says plainly when they are not.</p>
+
+<div class="scroll">
+  <table>
+    <thead><tr><th>Mode</th><th>What happens</th><th></th></tr></thead>
+    <tbody>
+      <tr><td>Straight to live</td><td>Every change ships when it is done. Git is the undo.</td><td></td></tr>
+      <tr><td>Preview when risky</td><td>The run uses the same rule as for asking: removes something, touches other pages, rewrites words you did not supply. Those wait as <em>Ready to look</em>; everything else ships.</td><td class="pick">Default</td></tr>
+      <tr><td>Always preview</td><td>Nothing goes live without your OK.</td><td></td></tr>
+      <tr><td>Collected</td><td>Several finished comments on one preview, shipped together.</td><td></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<ul class="plain">
+  <li><b>Show</b> opens the preview at the very element, as it does on the live site.</li>
+  <li>A thin bar on the preview: <em>Preview of #11 · Ship it · Not like this</em>. The last opens the comment box on that issue, and the run reworks the same preview.</li>
+  <li>Before and after screenshots, taken at the commenter's screen size, sit beside each item in Issues.</li>
+  <li>Previews nobody touches close after a few days. They are never indexed and never counted in analytics.</li>
+</ul>
+
+<h2 id="walls">The walls</h2>
+<p>A comment changes a website without anyone reviewing it first, so every layer assumes the one before it could fail.</p>
+<ol class="steps">
+  <li><b>Only the owner can send.</b> A secret link once per browser. Each new browser opens its own issue, mentions the owner, and can be revoked there.</li>
+  <li><b>Only accepted authors count.</b> The runner reads issues written by the site's own account and notes from the owner. A stranger's comment on the tracker never reaches the agent as an instruction.</li>
+  <li><b>Words are data.</b> The comment is the only instruction; everything captured from the page arrives labelled as page content.</li>
+  <li><b>The run is fenced.</b> It may change content, components, styles, records and docs, and nothing that runs later outside it. No keys, no network tools, no pushing, no deploying. On a computer that is a macOS sandbox plus a guard; in CI it is the container plus the same guard.</li>
+  <li><b>Checked before shipping.</b> Every file the run's commits touched is checked; anything outside the allowed paths, and nothing ships.</li>
+  <li><b>Everything is in git.</b> Any single change can be reverted.</li>
+</ol>
+
+<h2 id="installer">The installer</h2>
+<p>One skill you run once, in whatever agent you already use. Setting up should take a few minutes and almost no thought.</p>
+<p>It starts from what is already there: the repository, the files around it, the tools that are signed in, and what your agent already knows about you and the project. Where the answer is clear, it decides and moves on. It asks only where the choice is really yours, one question at a time, with its recommendation first. At the end it sends a test comment through the whole loop and tells you in a few lines what it set up.</p>
+
+<h3>What it works out by itself</h3>
+<div class="scroll">
+  <table>
+    <thead><tr><th>It looks at</th><th>And decides</th></tr></thead>
+    <tbody>
+      <tr><td>The git remote</td><td>Where the code lives and where comments go: GitHub or GitLab issues. Linear or Jira only if the project already uses them.</td></tr>
+      <tr><td>Host and CI files</td><td>How a push deploys, where the small function that talks to the tracker goes, and whether previews come for free.</td></tr>
+      <tr><td>The framework</td><td>Where the script tag goes, and whether source codes can be stamped at build time.</td></tr>
+      <tr><td>Signed-in tools</td><td>Which agent and which runner are already in reach, so nothing new has to be installed when something present will do.</td></tr>
+      <tr><td>Your agent's notes</td><td>What it already knows about you and the project (CLAUDE.md, AGENTS.md, memory): branch rules, who gets mentioned, words to keep.</td></tr>
+    </tbody>
+  </table>
+</div>
+<p>How much may go live without you looking first is set from the host: <em>preview when risky</em> where previews come for free, <em>straight to live</em> where they do not. The summary says which, and one sentence changes it.</p>
+
+<h3>When it asks</h3>
+<div class="decision"><p class="q">Several good answers that cost different things.</p><p>Where the runner works, for example: the tracker's CI uses its minutes, your own computer only works while it is on.</p></div>
+<div class="decision"><p class="q">Something only you can do.</p><p>Creating a token, storing a secret in CI, approving access. It says exactly where to click and waits.</p></div>
+
+<h3>What you get at the end</h3>
+<div class="result">
+  <p class="result-head">PointToShip is set up for shop.example.com</p>
+  <ul>
+    <li>Comments become issues in GitLab, project <code>acme/shop</code>.</li>
+    <li>GitLab CI works them with Claude Code. About 60 comments a month fit the free minutes.</li>
+    <li>Changes go live when Vercel deploys <code>main</code>. Risky ones wait as a preview first.</li>
+    <li>The test comment went through and shipped in 2 minutes 40 seconds.</li>
+  </ul>
+  <p>Open your site once in each browser with the link below, and the dot appears.</p>
+  <p class="result-link">shop.example.com/?pointtoship=k7f2-9qa1</p>
+</div>
+
+<p>It also writes two skills into the repository, so whichever agent the runner starts finds them: the <b>method</b> (how a comment is worked) and the <b>doctor</b> (what to do when something hangs). The doctor checks first whether the agent has moved or been updated, then whether its login has expired, and only then looks at a stuck queue or a failed deploy.</p>
+
+</main>
+
+<footer>
+  <span class="label">Sources</span>
+  <ul class="plain">
+    <li><a href="https://www.w3.org/TR/annotation-model/#selectors">W3C Web Annotation Data Model, selectors</a></li>
+    <li><a href="https://docs.stagewise.io/core-concepts/agent-context">stagewise, agent context</a></li>
+    <li><a href="https://bugherd.com/website-annotation-tool">BugHerd, website annotation</a> · <a href="https://marker.io/bugherd/jira-integration">Marker.io</a></li>
+    <li><a href="https://code.claude.com/docs/en/github-actions">Claude Code GitHub Actions</a> · <a href="https://code.claude.com/docs/en/gitlab-ci-cd">Claude Code GitLab CI/CD</a></li>
+    <li><a href="https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent">GitHub Copilot cloud agent</a></li>
+    <li><a href="https://www.paperclipped.de/en/blog/agent-skills-open-standard-interoperability/">Agent Skills open standard</a></li>
+    <li><a href="https://cicdcalculator.com/gitlab-ci-free-tier">GitLab CI free tier</a></li>
+  </ul>
+</footer>

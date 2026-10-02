@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="0 0 1060 285" role="img" aria-label="Naming it versus pointing at it: describing the burger, the red call to action and a photo in words, or one click on the button with the comment Change text to Book now."><style>.dg text { font-family: "Helvetica Neue", Arial, sans-serif; font-size: 12px; fill: #e9eae6; }
+.dg .lane { fill: #16191e; }
+.dg .card { fill: #1b1e24; stroke: #2e333b; stroke-width: 1; }
+.dg .rule { stroke: #2e333b; stroke-width: 1; fill: none; }
+.dg .bar { fill: #2e333b; }
+.dg .ink { fill: #9aa0a8; opacity: .5; }
+.dg .stroke-ink { stroke: #9aa0a8; stroke-width: 2; stroke-linecap: round; fill: none; }
+.dg .btn { fill: #ef8b72; }
+.dg .sel { fill: rgba(125, 151, 255, .12); stroke: #7d97ff; stroke-width: 2; }
+.dg .bubble { fill: #1b1e24; stroke: #7d97ff; stroke-width: 1.5; }
+.dg .pill { fill: #121418; stroke: #2e333b; stroke-width: 1; }
+.dg .acc-line { stroke: #7d97ff; stroke-width: 1.5; fill: none; }
+.dg .acc-dash { stroke: #7d97ff; stroke-width: 1.2; stroke-dasharray: 3 3; fill: none; }
+.dg .cursor { fill: #e9eae6; stroke: #1b1e24; stroke-width: 1; }
+.dg .badge { fill: #7d97ff; }
+.dg .arrow { stroke: #9aa0a8; stroke-width: 1.5; fill: none; }
+.dg .arrow.dash { stroke-dasharray: 4 4; }
+.dg .ah { fill: #9aa0a8; }
+.dg .lead { stroke: #9aa0a8; stroke-width: 1; stroke-dasharray: 3 3; fill: none; }
+.dg text.lbl { font-size: 10.5px; letter-spacing: .08em; fill: #9aa0a8; }
+.dg text.name { font-size: 14px; font-weight: 700; }
+.dg text.cap { font-size: 12.5px; text-anchor: middle; }
+.dg text.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; }
+.dg text.note { font-family: Georgia, "Times New Roman", serif; font-style: italic; font-size: 11.5px; }
+.dg text.small { font-size: 10.5px; fill: #9aa0a8; }
+.dg text.s11 { font-size: 11px; }
+.dg text.s115 { font-size: 11.5px; }
+.dg text.btn-t { fill: #1b1e24; font-size: 10px; text-anchor: middle; }
+.dg text.badge-t { fill: #1b1e24; font-size: 11px; font-weight: 700; text-anchor: middle; }
+.dg text.alabel { font-size: 11px; fill: #9aa0a8; text-anchor: middle; paint-order: stroke; stroke: #121418; stroke-width: 5px; stroke-linejoin: round; }
+.dg text.alabel.start { text-anchor: start; }
+.dg text.q { font-size: 13px; fill: #9aa0a8; }
+.dg text.q.end { text-anchor: end; }
+.dg text.q.i { font-family: Georgia, "Times New Roman", serif; font-style: italic; }
+.dg text.qm { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; fill: #9aa0a8; text-anchor: end; }
+.dg text.say { font-size: 13px; }
+.dg .m { fill: #9aa0a8; }
+.dg .ok { fill: #6cc08d; }
+.dg .warn { fill: #ef8b72; }
+.dg .acc { fill: #7d97ff; }
+.dg .b { font-weight: 700; }</style><text x="150" y="22" style="font-size:12px;letter-spacing:.08em;font-weight:700">NAMING IT</text><text class="small" x="150" y="40" style="font-size:12px">You need to know what it is called, or describe it.</text><g transform="translate(0 50)">
+        <rect class="card" x="150" y="20" width="200" height="190" rx="8"/>
+        <line class="rule" x1="150" y1="44" x2="350" y2="44"/>
+        <rect class="ink" x="160" y="28" width="30" height="8" rx="2"/>
+        <path class="stroke-ink" d="M326 27h14M326 32h14M326 37h14"/>
+        <rect class="lane" x="151" y="45" width="49" height="131"/>
+        <rect class="bar" x="160" y="58" width="30" height="4" rx="2"/>
+        <rect class="bar" x="160" y="70" width="30" height="4" rx="2"/>
+        <rect class="bar" x="160" y="82" width="30" height="4" rx="2"/>
+        <rect class="ink" x="210" y="56" width="90" height="10" rx="2"/>
+        <rect class="bar" x="210" y="74" width="126" height="4" rx="2"/>
+        <rect class="bar" x="210" y="82" width="100" height="4" rx="2"/>
+        <rect class="btn" x="210" y="96" width="56" height="18" rx="3"/>
+        <text class="btn-t" x="238" y="108" style="font-size:9px">Contact us</text>
+        <rect class="bar" x="210" y="128" width="40" height="36" rx="3"/>
+        <rect class="bar" x="254" y="128" width="40" height="36" rx="3"/>
+        <rect class="bar" x="298" y="128" width="40" height="36" rx="3"/>
+        <circle class="ink" cx="228" cy="140" r="4"/><path class="ink" d="M220 164v-8a8 8 0 0 1 16 0v8Z"/><rect class="ink" x="234" y="137" width="3.5" height="7" rx="1"/>
+        <circle class="ink" cx="272" cy="140" r="4"/><path class="ink" d="M264 164v-8a8 8 0 0 1 16 0v8Z"/><rect class="ink" x="278" y="137" width="3.5" height="7" rx="1"/>
+        <path class="ink" d="M302 164L313 147L320 156L326 150L334 164Z"/>
+        <path class="lane" d="M151 176H349V202a7 7 0 0 1-7 7H158a7 7 0 0 1-7-7Z"/>
+        <line class="rule" x1="150" y1="176" x2="350" y2="176"/>
+
+        <path class="lead" d="M343 37L360 42"/>
+        <text class="q i" x="364" y="38">“that menu in the corner,</text>
+        <text class="q i" x="364" y="54">I mean the burger”</text>
+        <path class="lead" d="M268 105H358"/>
+        <text class="q i" x="364" y="102">“the call to action in red</text>
+        <text class="q i" x="364" y="118">that says ‘Contact us’”</text>
+        <path class="lead" d="M274 165V170H358"/>
+        <text class="q i" x="364" y="166">“the photo with the guy</text>
+        <text class="q i" x="364" y="182">on the phone, but not</text>
+        <text class="q i" x="364" y="198">the first one”</text>
+      </g><text x="690" y="22" style="font-size:12px;letter-spacing:.08em;font-weight:700" class="acc">POINTING AT IT</text><text class="small" x="690" y="40" style="font-size:12px">It does not matter what it is called.</text><g transform="translate(540 50)">
+        <rect class="card" x="150" y="20" width="200" height="190" rx="8"/>
+        <line class="rule" x1="150" y1="44" x2="350" y2="44"/>
+        <rect class="ink" x="160" y="28" width="30" height="8" rx="2"/>
+        <path class="stroke-ink" d="M326 27h14M326 32h14M326 37h14"/>
+        <rect class="lane" x="151" y="45" width="49" height="131"/>
+        <rect class="bar" x="160" y="58" width="30" height="4" rx="2"/>
+        <rect class="bar" x="160" y="70" width="30" height="4" rx="2"/>
+        <rect class="bar" x="160" y="82" width="30" height="4" rx="2"/>
+        <rect class="ink" x="210" y="56" width="90" height="10" rx="2"/>
+        <rect class="bar" x="210" y="74" width="126" height="4" rx="2"/>
+        <rect class="bar" x="210" y="82" width="100" height="4" rx="2"/>
+        <rect class="sel" x="205" y="91" width="66" height="28" rx="5"/>
+        <rect class="btn" x="210" y="96" width="56" height="18" rx="3"/>
+        <text class="btn-t" x="238" y="108" style="font-size:9px">Contact us</text>
+        <rect class="bar" x="210" y="128" width="40" height="36" rx="3"/>
+        <rect class="bar" x="254" y="128" width="40" height="36" rx="3"/>
+        <rect class="bar" x="298" y="128" width="40" height="36" rx="3"/>
+        <circle class="ink" cx="228" cy="140" r="4"/><path class="ink" d="M220 164v-8a8 8 0 0 1 16 0v8Z"/><rect class="ink" x="234" y="137" width="3.5" height="7" rx="1"/>
+        <circle class="ink" cx="272" cy="140" r="4"/><path class="ink" d="M264 164v-8a8 8 0 0 1 16 0v8Z"/><rect class="ink" x="278" y="137" width="3.5" height="7" rx="1"/>
+        <path class="ink" d="M302 164L313 147L320 156L326 150L334 164Z"/>
+        <path class="lane" d="M151 176H349V202a7 7 0 0 1-7 7H158a7 7 0 0 1-7-7Z"/>
+        <line class="rule" x1="150" y1="176" x2="350" y2="176"/>
+        <polygon class="cursor" points="252,110 252,128 256.5,123.5 260,131 263,129.5 259.5,122 266,122"/>
+
+        <path class="acc-line" d="M271 105H362"/>
+        <rect class="bubble" x="362" y="82" width="132" height="46" rx="6"/>
+        <text class="say" x="374" y="101">Change text to</text>
+        <text class="say" x="374" y="119">“Book now”</text>
+
+        <text class="qm" x="132" y="70">its text</text>
+        <text class="qm" x="132" y="88">its place</text>
+        <text class="qm" x="132" y="106">its size</text>
+        <text class="qm" x="132" y="124">its style</text>
+        <text class="qm" x="132" y="142">the page</text>
+        <path class="acc-dash" d="M138 60V146M138 105H205"/>
+      </g></svg>
