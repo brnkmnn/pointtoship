@@ -1,6 +1,7 @@
 # PointToShip in detail
 
 - [Pointing](#pointing)
+- [Show](#show)
 - [Runners](#runners)
 - [Previews](#previews)
 - [Safety](#safety)
@@ -67,6 +68,34 @@ describes exactly this with layered selectors.
 
 A site may also label its own meaningful ids (`data-ps-id="photo:Work-03S"`).
 Without such labels it still works, one level more generic.
+
+## Show
+
+When a comment is done, Show takes you to the changed element. Where the
+browser can, the change animates in: the element grows, shrinks or moves from
+its old look to its new one, and its neighbours slide along.
+
+After a deploy, the page you have open is still the old version. So Show
+navigates to the page, and the script marks the element on both sides: on the
+old page it knows the element, on the new page it finds it from the pointer
+the runner saved after the change. The browser animates between the two with
+a [cross-document view transition](https://developer.mozilla.org/en-US/docs/Web/CSS/@view-transition).
+
+- Chrome, Edge, Opera and Safari animate. Firefox loads the new page and
+  outlines the element.
+- Show navigates rather than reloads, because the browser animates
+  navigations only. The address carries the issue number, which also gets
+  past a cached copy of the old page.
+- The loader sits in the page head, so the element is marked before the new
+  page is first painted.
+- If the new page takes longer than four seconds, the browser skips the
+  animation. The outline still marks the spot.
+- A removed or rebuilt element fades rather than morphs, and a change on
+  another page opens that page first. The before and after screenshots in
+  Issues cover the rest.
+
+The [demo](../demo/index.html) does exactly this between two versions of one
+page.
 
 ## Runners
 

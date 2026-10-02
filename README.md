@@ -7,9 +7,9 @@ takes you to the result.
 > **Status: concept.** The design is settled and a prototype runs on one
 > site. The installer is not ready yet.
 
-![Pointing at a small icon on a page, typing "bigger", and the icon growing to match the other two once the issue is done.](docs/img/demo.gif)
+![On an example site, pointing at a small icon, typing "bigger", and after Done, Show animates the icon to the size of the other two.](docs/img/demo.gif)
 
-<sub>A mockup of the flow (<a href="demo/index.html">demo/</a>). The agent's part is simulated here; for real it takes a minute or two.</sub>
+<sub>A mockup of the flow (<a href="demo/index.html">demo/</a>). The agent's part is simulated; for real it takes a minute or two. Show is real: the browser animates from the old page to the new one.</sub>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/img/loop-dark.svg">

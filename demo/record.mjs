@@ -1,27 +1,42 @@
-// Records the demo flow on index.html: open the dot, Select, click the small
-// icon, type "bigger", send, wait for Done, Show. Writes ../docs/img/demo.gif.
+// Records the demo flow on index.html: scroll to the cards, open the dot,
+// Select, click the small icon, type "bigger", send, wait for Done, Show (a
+// real navigation with a view transition). Writes ../docs/img/demo.gif.
 // Needs ffmpeg on PATH. Run: npm install && npm run record
 import { chromium } from "playwright";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readdirSync, rmSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
+import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 
 const here = fileURLToPath(new URL(".", import.meta.url));
-const page_url = pathToFileURL(join(here, "index.html")).href;
 const out_gif = resolve(here, "../docs/img/demo.gif");
 const size = { width: 1200, height: 700 };
 
+// View transitions need a real origin, so the page is served, not opened.
+const server = createServer((req, res) => {
+  if (new URL(req.url, "http://x").pathname !== "/") { res.writeHead(404).end(); return; }
+  res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" }).end(readFileSync(join(here, "index.html")));
+});
+await new Promise((ok) => server.listen(0, "127.0.0.1", ok));
+const page_url = `http://127.0.0.1:${server.address().port}/`;
+
 // Headless video has no cursor, so the page gets a drawn one that follows
-// the mouse and dips on each click.
+// the mouse, dips on each click and keeps its place across a navigation.
 const cursor_script = () => {
   addEventListener("DOMContentLoaded", () => {
     const c = document.createElement("div");
     c.innerHTML = '<svg width="26" height="26" viewBox="0 0 14 14"><path d="M3 1.5 L3 12 L5.8 9.4 L7.7 13 L9.4 12.2 L7.6 8.7 L11.3 8.5 Z" fill="#131211" stroke="#fff" stroke-width=".9" stroke-linejoin="round"/></svg>';
     Object.assign(c.style, { position: "fixed", left: "0", top: "0", zIndex: "100000", pointerEvents: "none", transformOrigin: "4px 2px", transition: "scale .12s" });
     document.body.append(c);
-    addEventListener("mousemove", (e) => { c.style.translate = `${e.clientX - 5}px ${e.clientY - 2}px`; }, true);
+    const put = (x, y) => { c.style.translate = `${x - 5}px ${y - 2}px`; };
+    const last = JSON.parse(sessionStorage.getItem("demo-cursor") ?? "null");
+    if (last) put(last.x, last.y);
+    addEventListener("mousemove", (e) => {
+      put(e.clientX, e.clientY);
+      sessionStorage.setItem("demo-cursor", JSON.stringify({ x: e.clientX, y: e.clientY }));
+    }, true);
     addEventListener("mousedown", () => { c.style.scale = ".82"; }, true);
     addEventListener("mouseup", () => { c.style.scale = "1"; }, true);
   });
@@ -34,7 +49,7 @@ const context = await browser.newContext({ viewport: size, deviceScaleFactor: 1,
 await context.addInitScript(cursor_script);
 const page = await context.newPage();
 
-let at = { x: 600, y: 420 };
+let at = { x: 640, y: 360 };
 const wait = (ms) => page.waitForTimeout(ms);
 
 // Eased glide, so the cursor reads like a hand and not a jump.
@@ -70,7 +85,15 @@ try {
   await page.evaluate(() => document.fonts.ready);
   await page.mouse.move(at.x, at.y);
   const ready = Date.now();
-  await wait(1300);
+  await wait(1400);
+
+  // Down to the cards, in small wheel steps so it reads as a scroll.
+  const goal = await page.evaluate(() => document.querySelector("#features h2").getBoundingClientRect().top - 40);
+  for (let done = 0; done < goal; done += 24) {
+    await page.mouse.wheel(0, Math.min(24, goal - done));
+    await wait(16);
+  }
+  await wait(700);
 
   await click(".fbm-dot", 900);
   await wait(650);
@@ -95,7 +118,8 @@ try {
   await page.waitForFunction(() => document.querySelector('[data-act="show"]'));
   await wait(1700);
   await click('[data-act="show"]', 700);
-  await wait(3200);
+  await page.waitForURL(/pts=12/);
+  await wait(3400);
 
   await context.close();
   await browser.close();
@@ -110,5 +134,6 @@ try {
   console.log(`wrote ${out_gif}`);
 } finally {
   await browser.close().catch(() => {});
+  server.close();
   rmSync(tmp, { recursive: true, force: true });
 }

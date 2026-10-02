@@ -454,6 +454,17 @@ figcaption { font-size: var(--step--1); color: var(--muted); margin: .7rem auto 
 </ol>
 <p class="note">Site adapters stay possible: a site may label its own meaningful ids (<code>data-ps-id="photo:Work-03S"</code>). Without adapters it still works, one level more generic.</p>
 
+<h2 id="show">Show</h2>
+<p>When a comment is done, Show takes you to the changed element. Where the browser can, the change animates in: the element grows, shrinks or moves from its old look to its new one, and its neighbours slide along, so you see at a glance what changed.</p>
+<p>After a deploy, the page you have open is still the old version. So Show navigates to the page, and the script marks the element on both sides: on the old page it knows the element, on the new page it finds it from the pointer the runner saved after the change. The browser animates between the two, with no snapshot or video of our own.</p>
+<ul class="plain">
+  <li>Chrome, Edge, Opera and Safari animate. Firefox loads the new page and outlines the element.</li>
+  <li>Show navigates rather than reloads, because the browser animates navigations only. The address carries the issue number, which also gets past a cached copy of the old page.</li>
+  <li>The loader sits in the page head, so the element is marked before the new page is first painted.</li>
+  <li>If the new page takes longer than four seconds, the browser skips the animation. The outline still marks the spot.</li>
+  <li>A removed or rebuilt element fades rather than morphs, and a change on another page opens that page first. The before and after screenshots in Issues cover the rest.</li>
+</ul>
+
 <h2 id="runners">Runners</h2>
 <p>Easy, robust and reliable wins. The installer recommends one and explains the others.</p>
 <div class="scroll">
