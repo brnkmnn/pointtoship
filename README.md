@@ -7,6 +7,10 @@ takes you to the result.
 > **Status: concept.** The design is settled and a prototype runs on one
 > site. The installer is not ready yet.
 
+![Pointing at a small icon on a page, typing "bigger", and the icon growing to match the other two once the issue is done.](docs/img/demo.gif)
+
+<sub>A mockup of the flow (<a href="demo/index.html">demo/</a>). The agent's part is simulated here; for real it takes a minute or two.</sub>
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/img/loop-dark.svg">
   <img src="docs/img/loop-light.svg" alt="The loop in eight steps: you point and comment on your site, an issue opens in your tracker, a runner starts a coding agent, the agent follows the method skill and commits, the runner checks the files and pushes, the host deploys, and status and Show come back to the page.">

@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PointToShip demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+/* An example site: a hero and three advantages. The third icon is too small
+   on purpose; the demo comment fixes it. */
+:root {
+  --bg: #f3f4f1;
+  --paper: #fbfbf9;
+  --fg: #16181c;
+  --muted: #5d636b;
+  --rule: #d6d9d3;
+  --accent: #2f5bff;
+  --display: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --body: "Source Serif 4", Georgia, serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 17px; line-height: 1.55; }
+.site-nav { max-width: 1040px; margin: 0 auto; padding: 22px 24px; display: flex; justify-content: space-between; align-items: center; font-family: var(--display); }
+.site-nav b { font-size: 18px; }
+.site-nav span { font-size: 14px; color: var(--muted); display: flex; gap: 22px; }
+.hero { max-width: 1040px; margin: 0 auto; padding: 36px 24px 40px; }
+.hero h1 { font-family: var(--display); font-size: 52px; line-height: 1.05; letter-spacing: -.02em; margin: 0 0 14px; max-width: 14ch; }
+.hero p { font-size: 20px; color: var(--muted); max-width: 36rem; margin: 0; }
+.advantages { max-width: 1040px; margin: 0 auto; padding: 8px 24px 80px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.card { background: var(--paper); border: 1px solid var(--rule); border-radius: 10px; padding: 26px 24px 24px; min-width: 0; }
+.card .icon { display: block; width: 44px; height: 44px; color: var(--accent); margin-bottom: 18px; transition: width .5s ease, height .5s ease; }
+.card .icon.small { width: 26px; height: 26px; }
+.card h3 { font-family: var(--display); font-size: 21px; margin: 0 0 6px; }
+.card p { margin: 0; color: var(--muted); font-size: 16px; }
+@media (max-width: 760px) { .advantages { grid-template-columns: 1fr; } .hero h1 { font-size: 40px; } }
+
+/* The overlay, after the prototype on christopherbrinkmann.com. */
+.fbm { font-family: var(--body); color: #131211; font-size: 15px; line-height: 1.35; }
+.fbm * { box-sizing: border-box; }
+.fbm-dock { position: fixed; right: 24px; bottom: 20px; z-index: 10001; display: flex; gap: 8px; align-items: flex-end; }
+.fbm-btn { appearance: none; border: 1px solid #131211; background: #f8f5f1; color: #131211; font: inherit; font-size: 14px; padding: 9px 14px; border-radius: 999px; cursor: pointer; }
+.fbm-btn.primary { background: #131211; color: #f8f5f1; }
+.fbm-btn:disabled { opacity: .5; }
+.fbm-dock .fbm-btn { height: 34px; padding: 0 14px 0 12px; display: inline-flex; align-items: center; gap: 7px; }
+.fbm-dock .fbm-btn svg { width: 14px; height: 14px; flex: none; }
+.fbm-dot { appearance: none; position: relative; width: 34px; height: 34px; padding: 0; border: none; border-radius: 50%; background: #131211; color: #f8f5f1; display: grid; place-items: center; cursor: pointer; }
+.fbm-dot svg { width: 16px; height: 16px; }
+.fbm-outline { position: fixed; z-index: 10000; pointer-events: none; border: 2px solid var(--accent); border-radius: 3px; background: rgba(47, 91, 255, .06); transition: all .12s ease-out; display: none; }
+.fbm-hint { position: fixed; z-index: 10002; top: 12px; left: 50%; transform: translateX(-50%); background: #f8f5f1; border: 1px solid #131211; border-radius: 999px; padding: 7px 14px; font-size: 14px; }
+.fbm-sheet { position: fixed; z-index: 10002; right: 24px; bottom: 20px; width: 400px; max-height: 75vh; overflow: auto; background: #f8f5f1; border: 1px solid #131211; border-radius: 10px; padding: 14px; box-shadow: 0 8px 30px rgba(0, 0, 0, .08); }
+.fbm-what { font-size: 13px; margin-bottom: 8px; }
+.fbm-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.fbm-chip { appearance: none; border: 1px solid #13121155; background: transparent; font: inherit; font-size: 13px; padding: 4px 10px; border-radius: 999px; cursor: pointer; color: inherit; }
+.fbm textarea { width: 100%; min-height: 72px; font: inherit; font-size: 16px; padding: 10px; border: 1px solid #13121166; border-radius: 6px; background: #fff; color: inherit; resize: none; }
+.fbm-row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; align-items: center; }
+.fbm-h { font-size: 13px; opacity: .7; margin: 0; }
+.fbm-item { border-top: 1px solid #13121122; padding: 10px 0; }
+.fbm-item:first-of-type { border-top: 0; }
+.fbm-head { display: flex; gap: 8px; align-items: baseline; }
+.fbm-pill { flex: none; font-size: 11px; padding: 1px 7px; border-radius: 999px; border: 1px solid currentColor; }
+.fbm-pill.working { color: var(--accent); }
+.fbm-pill.done { color: #3f7d4e; }
+.fbm-title { flex: 1; min-width: 0; }
+.fbm-time { flex: none; font-size: 12px; opacity: .6; }
+.fbm-said { font-size: 13px; margin: 8px 0 0; padding: 8px; background: #fff; border-radius: 6px; }
+.fbm-toast { position: fixed; z-index: 10003; top: 14px; left: 50%; transform: translateX(-50%); background: #131211; color: #f8f5f1; border-radius: 999px; padding: 7px 16px; font-family: var(--display); font-size: 14px; }
+.reloading { animation: reload .45s ease; }
+@keyframes reload { 40% { opacity: .25; } }
+@media (prefers-reduced-motion: reduce) { .card .icon, .fbm-outline { transition: none; } .reloading { animation: none; } }
+</style>
+</head>
+<body>
+
+<nav class="site-nav"><b>PointToShip</b><span><span>How it works</span><span>Install</span><span>GitHub</span></span></nav>
+
+<header class="hero">
+  <h1>Point at it. It ships.</h1>
+  <p>Say what should change on your live site, right where you see it. An agent does the work and reports back on the page.</p>
+</header>
+
+<main class="advantages">
+  <section class="card">
+    <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
+      <rect x="6" y="6" width="26" height="20" rx="3" stroke-dasharray="4 4"/>
+      <path d="M24 20 L24 42 L29.5 36.5 L33.5 44 L37 42.4 L33 35 L40.5 34.5 Z" fill="currentColor"/>
+    </svg>
+    <h3>Point, don't name</h3>
+    <p>Sidebar or side menu? It does not matter. Click the thing, and the agent knows exactly what you mean.</p>
+  </section>
+  <section class="card">
+    <svg class="icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
+      <rect x="5" y="8" width="38" height="32" rx="4"/>
+      <path d="M5 16 H43"/>
+      <path d="M17 28 L22 33 L32 23"/>
+    </svg>
+    <h3>Stays on the page</h3>
+    <p>You comment where you saw it, and the status and the change come back there. No tab to switch to.</p>
+  </section>
+  <section class="card">
+    <svg class="icon small" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
+      <path d="M6 22 L42 6 L30 42 L22 27 Z"/>
+      <path d="M22 27 L42 6"/>
+    </svg>
+    <h3>Ships while you browse</h3>
+    <p>Your coding agent works the comment, deploys it and tells you in two or three sentences what it did.</p>
+  </section>
+</main>
+
+<div class="fbm" id="fbm">
+  <div class="fbm-outline" id="fbm-outline"></div>
+</div>
+
+<script>
+// The overlay of PointToShip, with the tracker and the agent simulated in
+// the page. Only the demo comment ("bigger" on an icon) changes anything.
+(() => {
+  const ICONS = {
+    list: '<svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="2" cy="3" r="1.1" fill="currentColor"/><circle cx="2" cy="7" r="1.1" fill="currentColor"/><circle cx="2" cy="11" r="1.1" fill="currentColor"/><path d="M5 3h8M5 7h8M5 11h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
+    arrow: '<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5 L3 12 L5.8 9.4 L7.7 13 L9.4 12.2 L7.6 8.7 L11.3 8.5 Z" fill="currentColor" stroke-linejoin="round"/></svg>',
+    bubble: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 3.5 h11 v7 h-6 l-3 2.5 v-2.5 h-2 z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>',
+    close: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5 L12.5 12.5 M12.5 3.5 L3.5 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  };
+  const STATUS = { queued: "Queued", working: "Working", done: "Done" };
+  const POINTABLE = "svg, h1, h3, p, b, .card, .hero, .site-nav";
+
+  const root = document.getElementById("fbm");
+  const outline = document.getElementById("fbm-outline");
+  const ui = document.createElement("div");
+  root.append(ui);
+
+  const state = {
+    mode: "idle",          // idle | unfolded | pointing | composing | panel
+    target: null,
+    items: [
+      { id: 11, title: "Less space under the headline", status: "done", time: "1 h", said: "Halved the space under the headline, so the intro sits closer." },
+    ],
+  };
+
+  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+  const describe = (el) => {
+    const card = el.closest(".card");
+    const where = card ? ` in “${card.querySelector("h3").textContent}”` : "";
+    if (el.matches("svg")) return `Icon${where}`;
+    if (el.matches("h1, h3")) return `Heading “${el.textContent}”`;
+    if (el.matches("p")) return `Text${where}`;
+    if (el.matches(".card")) return `Card “${el.querySelector("h3").textContent}”`;
+    return "Section";
+  };
+
+  const pointable = (x, y) => {
+    const hit = document.elementFromPoint(x, y);
+    if (!hit || root.contains(hit)) return null;
+    // Line icons only register hits on their strokes, so test their boxes.
+    const icon = [...document.querySelectorAll("main svg")].find((s) => {
+      const r = s.getBoundingClientRect();
+      return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+    });
+    return icon ?? hit.closest(POINTABLE);
+  };
+
+  const place = (el) => {
+    if (!el) { outline.style.display = "none"; return; }
+    const r = el.getBoundingClientRect();
+    Object.assign(outline.style, { display: "block", left: `${r.left - 4}px`, top: `${r.top - 4}px`, width: `${r.width + 8}px`, height: `${r.height + 8}px` });
+  };
+
+  const render = () => {
+    const { mode, target } = state;
+    if (mode === "idle" || mode === "unfolded") {
+      ui.innerHTML = `<div class="fbm-dock">
+        ${mode === "unfolded" ? `<button class="fbm-btn" data-act="issues">${ICONS.list}Issues</button>
+        <button class="fbm-btn primary" data-act="select">${ICONS.arrow}Select</button>` : ""}
+        <button class="fbm-dot" data-act="dot" aria-label="${mode === "unfolded" ? "Close feedback" : "Feedback"}">${mode === "unfolded" ? ICONS.close : ICONS.bubble}</button>
+      </div>`;
+    } else if (mode === "pointing") {
+      ui.innerHTML = `<div class="fbm-hint">Click what you mean.</div>
+        <div class="fbm-dock"><button class="fbm-btn primary" data-act="cancel">Cancel</button></div>`;
+    } else if (mode === "composing") {
+      ui.innerHTML = `<div class="fbm-sheet">
+        <div class="fbm-what">${esc(describe(target))}</div>
+        <div class="fbm-chips"><button class="fbm-chip" data-act="wider">Wider</button><button class="fbm-chip" data-act="select">Point again</button></div>
+        <textarea id="fbm-text" placeholder="What should change?"></textarea>
+        <div class="fbm-row"><button class="fbm-btn" data-act="cancel">Cancel</button><button class="fbm-btn primary" data-act="send">Send</button></div>
+      </div>`;
+      ui.querySelector("textarea").focus();
+    } else if (mode === "panel") {
+      ui.innerHTML = `<div class="fbm-sheet">
+        <div class="fbm-row" style="margin:0 0 8px;justify-content:space-between"><span class="fbm-h">Issues</span>
+          <button class="fbm-dot" data-act="cancel" aria-label="Close issues">${ICONS.close}</button></div>
+        ${state.items.map((i) => `<div class="fbm-item">
+          <div class="fbm-head"><span class="fbm-pill ${i.status}">${STATUS[i.status]}</span>
+            <span class="fbm-title">#${i.id} ${esc(i.title)}</span><span class="fbm-time">${i.time}</span></div>
+          ${i.said ? `<div class="fbm-said">${esc(i.said)}</div>` : ""}
+          ${i.status === "done" && i.target ? `<div class="fbm-row"><button class="fbm-btn" data-act="show" data-id="${i.id}">Show</button></div>` : ""}
+        </div>`).join("")}
+      </div>`;
+    }
+    place(mode === "composing" ? target : null);
+  };
+
+  const set = (mode) => { state.mode = mode; render(); };
+
+  const toast = (text, ms) => {
+    const t = document.createElement("div");
+    t.className = "fbm-toast";
+    t.textContent = text;
+    root.append(t);
+    setTimeout(() => t.remove(), ms);
+  };
+
+  // The tracker and the agent, simulated: queued, working, done.
+  const work = (item) => {
+    const step = (status, time, ms) => setTimeout(() => {
+      Object.assign(item, { status, time });
+      if (status === "done") {
+        const sized = item.target.matches("svg") && /bigger|larger/i.test(item.title);
+        item.said = sized
+          ? "Made the icon the same size as the other two, 44 px. Live now."
+          : "This demo only simulates the agent, so nothing changed.";
+        item.apply = sized;
+      }
+      if (state.mode === "panel") render();
+    }, ms);
+    step("working", "now", 900);
+    setTimeout(() => toast("Two minutes later", 1600), 2200);
+    step("done", "now", 3000);
+  };
+
+  const show = (item) => {
+    set("idle");
+    document.body.classList.add("reloading");
+    setTimeout(() => {
+      if (item.apply) item.target.classList.remove("small");
+      item.target.scrollIntoView({ block: "center", behavior: "smooth" });
+      setTimeout(() => place(item.target), 520);
+      setTimeout(() => place(null), 2600);
+    }, 200);
+    setTimeout(() => document.body.classList.remove("reloading"), 500);
+  };
+
+  ui.addEventListener("click", (e) => {
+    const act = e.target.closest("[data-act]")?.dataset.act;
+    if (act === "dot") set(state.mode === "unfolded" ? "idle" : "unfolded");
+    else if (act === "select") set("pointing");
+    else if (act === "cancel") set("idle");
+    else if (act === "issues") set("panel");
+    else if (act === "wider") { state.target = state.target.parentElement.closest(POINTABLE) ?? state.target; render(); }
+    else if (act === "send") {
+      const text = ui.querySelector("textarea").value.trim();
+      if (!text) return;
+      const item = { id: 12, title: text, status: "queued", time: "now", target: state.target };
+      state.items.unshift(item);
+      set("panel");
+      work(item);
+    } else if (act === "show") show(state.items.find((i) => String(i.id) === e.target.dataset.id));
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    if (state.mode === "pointing") place(pointable(e.clientX, e.clientY));
+  });
+  document.addEventListener("click", (e) => {
+    if (state.mode !== "pointing" || root.contains(e.target)) return;
+    const el = pointable(e.clientX, e.clientY);
+    if (!el) return;
+    e.preventDefault();
+    state.target = el;
+    set("composing");
+  }, true);
+
+  render();
+})();
+</script>
+</body>
+</html>
