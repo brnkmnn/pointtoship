@@ -86,6 +86,8 @@ footer li { margin-bottom: .3rem; }
 /* Figures */
 figure { margin: 1.6rem 0; }
 figcaption { font-size: var(--step--1); color: var(--muted); margin: .7rem auto 0; max-width: 720px; }
+.demo { margin-top: 2.4rem; }
+.demo img { display: block; width: 100%; max-width: 960px; height: auto; margin: 0 auto; border: 1px solid var(--rule); border-radius: 8px; }
 .diagram { overflow-x: auto; }
 .diagram svg { display: block; width: 100%; height: auto; min-width: 680px; }
 .compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 12px; }
@@ -149,6 +151,11 @@ figcaption { font-size: var(--step--1); color: var(--muted); margin: .7rem auto 
 
 
 <main>
+
+<figure class="bleed demo">
+  <img src="demo.gif" width="960" height="560" alt="On an example site, the dot unfolds, Select is on, a too-small icon is clicked and the comment says bigger. The issue goes from Queued to Working to Done, and Show animates the icon to the size of the other two.">
+  <figcaption>A mockup on an example site. The agent's part is simulated; Show is the real browser transition from the old page to the new one.</figcaption>
+</figure>
 
 <h2 id="why">Why</h2>
 <p>Much of front-end work is saying which thing you mean. Is it the sidebar or the side menu? The burger menu? The footer, or the whole section above it? Is that button the call to action? And when an AI wrote the page, you may never have learned what its parts are called.</p>
