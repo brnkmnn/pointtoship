@@ -7,7 +7,7 @@ metadata:
   status: draft
 ---
 
-<!-- Draft. The references/ and assets/ files named below are not written yet. -->
+<!-- Draft. The method and doctor skills exist; the overlay, function and runner templates and the references/ files are not written yet. -->
 
 # Set up PointToShip
 
@@ -80,10 +80,17 @@ For each part, use the matching file in `references/` and the templates in
 3. **The runner** (`assets/runners/<runner>`). It owns its agent: a
    standalone CLI install or the CI image's copy, never a desktop app's
    bundled one. It checks its health before every comment.
-4. **The method and the doctor** (`assets/skills/`). Copy both into the
-   repository's skills folder so whichever agent the runner starts finds
-   them.
-5. **The secret link.** Generate it and keep it out of the repository.
+4. **The method and the doctor** (`assets/skills/pointtoship-method`,
+   `assets/skills/pointtoship-doctor`). Copy both into the repository's
+   skills folder (`.agents/skills/`, or the folder the chosen agent reads)
+   so whichever agent the runner starts finds them.
+5. **The config.** Write `.pointtoship/config.json` with what you decided:
+   the allowed paths, the checks, how to start the site, previews and the
+   mode. The format is in
+   [run-files.md](assets/skills/pointtoship-method/references/run-files.md).
+   Add `.pointtoship/notes.md` with anything the agent needs to know that the
+   code does not say, such as where content comes from.
+6. **The secret link.** Generate it and keep it out of the repository.
 
 Follow the project's own rules from step 1 for branches, commits and
 reviews.
