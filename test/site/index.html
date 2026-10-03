@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test shop</title>
+<!--POINTTOSHIP-->
+<style>
+body { margin: 0; font: 17px/1.5 system-ui, sans-serif; color: #111; background: #fff; }
+main { max-width: 960px; margin: 0 auto; padding: 40px 24px; }
+h1 { font-size: 44px; margin: 0 0 30px; }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.card { border: 2px solid #111; border-radius: 14px; padding: 24px; }
+.icon { display: block; width: 64px; height: 64px; margin-bottom: 16px; }
+.icon.small { width: 40px; height: 40px; }
+h3 { margin: 0 0 8px; font-size: 22px; }
+p { margin: 0; }
+</style>
+</head>
+<body>
+<main id="features">
+  <h1>Why people switch</h1>
+  <div class="cards">
+    <section class="card"><svg class="icon" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#111"/><circle cx="32" cy="32" r="12" fill="none" stroke="#fd3" stroke-width="4"/></svg><h3>Fast</h3><p>Invoices in a minute.</p></section>
+    <section class="card"><svg class="icon" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#111"/><path d="M20 34l8 8 16-18" fill="none" stroke="#fd3" stroke-width="4"/></svg><h3>Sure</h3><p>Reminders send themselves.</p></section>
+    <section class="card"><svg class="icon small" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#111"/><path d="M22 42L42 22" stroke="#fd3" stroke-width="4"/></svg><h3>Calm</h3><p>Taxes set aside.</p></section>
+  </div>
+</main>
+</body>
+</html>

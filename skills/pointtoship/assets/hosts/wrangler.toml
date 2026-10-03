@@ -1,0 +1,4 @@
+# For cloudflare-worker.js, next to it in .pointtoship/worker/.
+name = "pointtoship"
+main = "cloudflare-worker.js"
+compatibility_date = "2026-09-01"

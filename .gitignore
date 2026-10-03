@@ -2,3 +2,4 @@
 _claude/
 .DS_Store
 node_modules/
+test/e2e-show.png

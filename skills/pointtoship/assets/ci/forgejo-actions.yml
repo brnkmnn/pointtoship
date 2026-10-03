@@ -1,0 +1,35 @@
+# PointToShip runner for Forgejo, Codeberg and Gitea:
+# .forgejo/workflows/pointtoship.yml (Gitea: .gitea/workflows/pointtoship.yml)
+#
+# Secrets: PTS_TRACKER_TOKEN and PTS_GIT_TOKEN (an access token of the
+# runner's account with issue and repository write), and the agent's key.
+# `runs-on` must name a label your Actions runner has.
+name: PointToShip
+on:
+  issues:
+    types: [opened, labeled]
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: Issue number
+        required: false
+jobs:
+  run:
+    if: github.event_name != 'issues' || contains(github.event.issue.labels.*.name, 'pts')
+    runs-on: docker
+    container:
+      image: node:22
+    timeout-minutes: 40
+    steps:
+      - uses: https://code.forgejo.org/actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - run: npm install -g @anthropic-ai/claude-code
+      - run: npm ci
+      - run: node .pointtoship/lib/pointtoship-runner.mjs
+        env:
+          PTS_ISSUE: ${{ github.event.issue.number || inputs.issue }}
+          PTS_TRACKER_TOKEN: ${{ secrets.PTS_TRACKER_TOKEN }}
+          PTS_GIT_TOKEN: ${{ secrets.PTS_GIT_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

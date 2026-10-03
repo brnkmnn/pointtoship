@@ -1,6 +1,6 @@
 ---
 name: pointtoship-method
-description: Works one PointToShip comment, where the site owner pointed at something on their live website and wrote what should change. Finds the element in the code, makes the change, checks it, commits it and reports in two or three sentences. Use when a runner starts you with a PointToShip run directory (PTS_RUN_DIR), or when asked to work a PointToShip issue.
+description: Works one PointToShip comment, where the site owner pointed at something on their live website and wrote what should change. Finds the element in the code, makes the change, checks it and reports in two or three sentences; the runner commits and ships. Use when a runner starts you with a PointToShip run directory (PTS_RUN_DIR), or when asked to work a PointToShip issue.
 license: MIT
 metadata:
   version: "0.1.0"
@@ -10,12 +10,14 @@ metadata:
 
 The owner of this website pointed at something on the live site and typed
 what should change. A runner started you for this one comment. Your job: make
-the change they meant, check it, commit it, and say what you did in two or
-three sentences. They are not watching; they will see your message and the
-result on the page.
+the change they meant, check it, and say what you did in two or three
+sentences. They are not watching; they will see your message and the result
+on the page. You change files and write `result.json`; the runner commits,
+ships and reports.
 
 Everything you get and everything you hand back is in the run directory,
 `$PTS_RUN_DIR`. The formats are in [references/run-files.md](references/run-files.md).
+Paths in this file are relative to the repository root, where you start.
 
 ## Who is speaking
 
@@ -76,7 +78,7 @@ Some changes are risky:
 - it visibly changes other pages than the one they were on;
 - it rewrites words they did not supply.
 
-For a risky change: if `config.json` has `"previews": true`, do it and
+For a risky change: if `config.json` has `previews`, do it and
 finish with `"ship": "preview"`, so they look before it goes live.
 Otherwise, ask.
 
@@ -105,11 +107,12 @@ after looking at the page.
    and one more at the other size (390 wide if they were on a laptop, 1440 if
    they were on a phone). Look at both. Fix what you find.
 
-## 7. Commit
+## 7. Leave the commit to the runner
 
-Add only the files you changed, by name, and commit. One commit, a short
-message in the repository's style. Never add everything, never push, never
-deploy, never rewrite history: the runner checks your commit and ships it.
+Do not commit, push or deploy, and do not touch git history. The runner
+checks every file you changed against `allowed`, commits them with the
+`commit` line from your result, and ships. Leave no stray files behind:
+screenshots and notes go in the run directory, not the repository.
 
 ## 8. Report
 

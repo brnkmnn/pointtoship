@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- PointToShip runner on a Mac: ~/Library/LaunchAgents/dev.pointtoship.SITE.plist
+     Load with: launchctl load -w ~/Library/LaunchAgents/dev.pointtoship.SITE.plist
+     CLONE is a clone of the site that only the runner uses. ENV_FILE holds
+     the secrets (PTS_TRACKER_TOKEN=..., one per line) and stays out of git.
+     NODE is the full path of node (`which node`). -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>dev.pointtoship.SITE</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>-c</string>
+    <string>set -a; . "ENV_FILE"; set +a; exec "NODE" .pointtoship/lib/pointtoship-runner.mjs --watch 60</string>
+  </array>
+  <key>WorkingDirectory</key><string>CLONE</string>
+  <key>EnvironmentVariables</key>
+  <dict><key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string></dict>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>/tmp/pointtoship-SITE.log</string>
+  <key>StandardErrorPath</key><string>/tmp/pointtoship-SITE.log</string>
+</dict>
+</plist>

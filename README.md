@@ -4,8 +4,10 @@ Point at something on your live website, say what should change, and an
 agent works it, ships it and reports back on the page. One click on Show
 takes you to the result.
 
-> **Status: concept.** The design is settled and a prototype runs on one
-> site. The installer is not ready yet.
+> **Status: beta.** Every part is built: the installer, the overlay, the
+> small function, the runner and the skills. They pass an end-to-end test
+> against stand-ins for GitHub, GitLab and Gitea. The first real sites are
+> next.
 
 ![On an example site, pointing at a small icon, typing "bigger", and after Done, Show animates the icon to the size of the other two.](docs/img/demo.gif)
 
@@ -89,6 +91,19 @@ the one before it could fail.
 
 [docs/concept.md](docs/concept.md) covers pointing, runners, previews,
 safety and the installer in detail.
+
+## What is in here
+
+| Path | What |
+| --- | --- |
+| `skills/pointtoship/` | The installer skill, with everything it installs in `assets/` |
+| `assets/overlay/` | The loader for the page head and the overlay |
+| `assets/lib/` | The small function's core, the runner, a Node adapter |
+| `assets/hosts/` | The function for each framework and host |
+| `assets/ci/` | The runner for GitHub Actions, GitLab CI, Forgejo and Gitea Actions, a Mac, a Linux server |
+| `assets/skills/` | The method (how a comment is worked) and the doctor |
+| `test/` | The end-to-end test: `cd test && npm install && npm test` |
+| `demo/` | The example site in the GIF |
 
 ## License
 

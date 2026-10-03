@@ -1,0 +1,65 @@
+<!-- PointToShip loader. Put it in <head>, before other scripts. Visitors get
+     nothing but these few lines: the overlay loads only in browsers that
+     opened the site's secret link. When Show arrives from the overlay, it
+     marks the changed element before the page is painted, so the browser can
+     animate the change from the old page to the new one.
+     ENDPOINT: where the small function answers. SCRIPT: the overlay, from the
+     CDN pinned to a version, or a copy on the site itself. -->
+<script>
+(function () {
+  var ENDPOINT = "/api/pointtoship";
+  var SCRIPT = "https://cdn.jsdelivr.net/gh/brnkmnn/pointtoship@v0.1.0/skills/pointtoship/assets/overlay/pointtoship.js";
+  var on = false;
+  try { on = !!localStorage.getItem("pointtoship"); } catch (e) {}
+  if (!on && !/[?&]pointtoship=/.test(location.search)) return;
+  window.PointToShip = { endpoint: ENDPOINT };
+
+  var show = null;
+  try { show = JSON.parse(sessionStorage.getItem("pointtoship-show")); sessionStorage.removeItem("pointtoship-show"); } catch (e) {}
+  if (show && show.selector) {
+    var css = document.createElement("style");
+    css.textContent = "@view-transition{navigation:auto}"
+      + "::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation-duration:1s;animation-timing-function:cubic-bezier(.5,0,.25,1)}"
+      + "::view-transition-group(root),::view-transition-old(root),::view-transition-new(root){animation-duration:.25s}"
+      + "@media (prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}";
+    document.head.appendChild(css);
+    // The element morphs; its neighbours slide instead of crossfading.
+    var mark = function (el, on) {
+      el.style.viewTransitionName = on ? "pts-target" : "";
+      var near = Array.prototype.filter.call(el.parentElement.children, function (c) { return c !== el; }).slice(0, 40);
+      near.forEach(function (c, i) { c.style.viewTransitionName = on ? "pts-near-" + i : ""; });
+    };
+    // Keep the element where it was on screen, so only the change moves.
+    var place = function (el) {
+      if (typeof show.top === "number") scrollTo(0, el.getBoundingClientRect().top + scrollY - show.top);
+      else el.scrollIntoView({ block: "center" });
+    };
+    var done = function (el) {
+      window.__pointtoshipShown = el;
+      dispatchEvent(new CustomEvent("pointtoship:shown", { detail: el }));
+    };
+    var late = function () {
+      var el = document.querySelector(show.selector);
+      if (el) { place(el); done(el); }
+    };
+    if ("onpagereveal" in window) {
+      addEventListener("pagereveal", function (e) {
+        var el = document.querySelector(show.selector);
+        if (!el) { if (document.readyState === "loading") addEventListener("DOMContentLoaded", late); else late(); return; }
+        place(el);
+        if (!e.viewTransition) { done(el); return; }
+        mark(el, true);
+        var end = function () { mark(el, false); done(el); };
+        e.viewTransition.finished.then(end, end);
+      }, { once: true });
+    } else {
+      addEventListener("DOMContentLoaded", late);
+    }
+  }
+
+  var s = document.createElement("script");
+  s.src = SCRIPT;
+  s.async = true;
+  document.head.appendChild(s);
+})();
+</script>

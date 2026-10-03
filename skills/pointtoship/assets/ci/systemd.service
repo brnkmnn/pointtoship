@@ -1,0 +1,18 @@
+# PointToShip runner on a Linux server or computer:
+# ~/.config/systemd/user/pointtoship-SITE.service
+# Start with: systemctl --user enable --now pointtoship-SITE
+# CLONE is a clone of the site that only the runner uses; ENV_FILE holds the
+# secrets (PTS_TRACKER_TOKEN=..., one per line) and stays out of git.
+[Unit]
+Description=PointToShip runner for SITE
+After=network-online.target
+
+[Service]
+WorkingDirectory=CLONE
+EnvironmentFile=ENV_FILE
+ExecStart=/usr/bin/env node .pointtoship/lib/pointtoship-runner.mjs --watch 60
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=default.target

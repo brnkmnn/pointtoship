@@ -1,0 +1,7 @@
+{
+  "name": "pointtoship-test",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "PROVIDER=github node e2e.mjs && PROVIDER=gitlab node e2e.mjs && PROVIDER=gitea node e2e.mjs" },
+  "devDependencies": { "playwright": "1.58.2" }
+}

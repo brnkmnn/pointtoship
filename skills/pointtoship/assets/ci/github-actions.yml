@@ -1,0 +1,47 @@
+# PointToShip runner for GitHub: .github/workflows/pointtoship.yml
+#
+# Starts when the site's function opens an issue or moves one back to the
+# queue (labels added with the function's token trigger workflows; the
+# runner's own label changes with GITHUB_TOKEN do not, so it never loops).
+#
+# Repository secrets: the agent's key (ANTHROPIC_API_KEY here).
+# If the site deploys with a GitHub Actions workflow on push, set PTS_GIT_TOKEN
+# to a fine-grained token with contents: write instead of github.token:
+# pushes made with github.token do not start other workflows.
+name: PointToShip
+on:
+  issues:
+    types: [opened, labeled]
+  repository_dispatch:
+    types: [pointtoship]
+  workflow_dispatch:
+concurrency:
+  group: pointtoship
+  cancel-in-progress: false
+permissions:
+  contents: write
+  issues: write
+jobs:
+  run:
+    if: github.event_name != 'issues' || contains(github.event.issue.labels.*.name, 'pts')
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # The agent must not find push credentials in .git/config.
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # The agent. Swap for: npm i -g @openai/codex | @google/gemini-cli | @github/copilot | opencode-ai
+      - run: npm install -g @anthropic-ai/claude-code
+      # The site's own dependencies, so the agent can run its checks.
+      - run: npm ci
+      - run: node .pointtoship/lib/pointtoship-runner.mjs
+        env:
+          PTS_ISSUE: ${{ github.event.issue.number || github.event.client_payload.issue }}
+          PTS_TRACKER_TOKEN: ${{ github.token }}
+          PTS_GIT_TOKEN: ${{ github.token }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

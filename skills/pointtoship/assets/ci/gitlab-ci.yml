@@ -1,0 +1,26 @@
+# PointToShip runner for GitLab: add to .gitlab-ci.yml, or save as
+# .gitlab/pointtoship.yml and `include: { local: .gitlab/pointtoship.yml }`.
+#
+# GitLab starts no pipeline when an issue opens, so the site's function wakes
+# this job with a pipeline trigger token (PTS_TRIGGER=gitlab on the function).
+# A schedule with PTS_SCHEDULE=1 catches anything a missed trigger left.
+#
+# CI/CD variables (masked): PTS_TRACKER_TOKEN (the site account's token, api
+# scope), PTS_GIT_TOKEN (write_repository, or leave it out when the job token
+# may push), and the agent's key (ANTHROPIC_API_KEY here).
+pointtoship:
+  image: node:22
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "trigger" && $PTS_ISSUE
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $PTS_SCHEDULE
+    - if: $CI_PIPELINE_SOURCE == "web" && $PTS_ISSUE
+  resource_group: pointtoship
+  timeout: 40m
+  variables:
+    GIT_DEPTH: 0
+  before_script:
+    # The agent. Swap for: npm i -g @openai/codex | @google/gemini-cli | opencode-ai
+    - npm install -g @anthropic-ai/claude-code
+    - npm ci
+  script:
+    - node .pointtoship/lib/pointtoship-runner.mjs

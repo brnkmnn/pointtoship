@@ -3,11 +3,9 @@ name: pointtoship
 description: Sets up PointToShip on a website project, so the owner can point at something on the live site, say what should change, and have a coding agent work it, ship it and report back on the page. Use when the user asks to set up, install, configure, repair or remove PointToShip, or wants point-and-comment feedback on their site handled by an agent.
 license: MIT
 metadata:
-  version: "0.0.1"
-  status: draft
+  version: "0.1.0"
+  status: beta
 ---
-
-<!-- Draft. The method and doctor skills exist; the overlay, function and runner templates and the references/ files are not written yet. -->
 
 # Set up PointToShip
 
@@ -46,12 +44,14 @@ Decide without asking whenever the project gives one sensible answer:
 
 | Choice | Default |
 | --- | --- |
-| Tracker | Issues where the code lives. Linear or Jira only if the project already uses them. |
-| Small function to the tracker | On the site's own host: a Next.js route, a Cloudflare Worker, a Netlify Function. Never a hosted relay. |
-| Agent | The one you are running in, if it can run headless. |
+| Tracker | Issues where the code lives: GitHub, GitLab, Gitea, Forgejo or Codeberg. See [trackers](references/trackers.md). |
+| Small function | On the site's own host, with the framework's template. A separate Cloudflare Worker when the site has no server or runs on another stack. Never a hosted relay. See [hosts](references/hosts.md). |
+| Agent | The one you are running in, if it has a headless mode. See [runners](references/runners.md). |
 | Runner | The tracker's CI, unless the project clearly runs elsewhere. |
 | How much ships alone | *Preview when risky* where the host builds previews for free, otherwise *straight to live*. |
-| Source codes | Stamp them when the framework supports it cheaply. |
+| Allowed paths | The folders that hold the site's content, components and styles. Never build config, CI, server code with secrets, or `.pointtoship/`. |
+| Checks | The project's own lint, type and test commands that run in a minute or two. |
+| Source codes | Only when the framework stamps them cheaply. |
 
 Write each decision down for the summary. Do not explain it now.
 
@@ -70,37 +70,53 @@ read.
 
 ## 4. Install
 
-For each part, use the matching file in `references/` and the templates in
-`assets/`:
+Everything below comes from `assets/`. Copy files, do not rewrite them; adapt
+only paths, names and the values in the config.
 
-1. **The script tag** (`assets/overlay/`). Load it only for the owner, never
-   for visitors.
-2. **The small function** (`assets/functions/<host>`). It writes issues as
-   the site's own account and holds the tracker token.
-3. **The runner** (`assets/runners/<runner>`). It owns its agent: a
-   standalone CLI install or the CI image's copy, never a desktop app's
-   bundled one. It checks its health before every comment.
-4. **The method and the doctor** (`assets/skills/pointtoship-method`,
-   `assets/skills/pointtoship-doctor`). Copy both into the repository's
-   skills folder (`.agents/skills/`, or the folder the chosen agent reads)
-   so whichever agent the runner starts finds them.
-5. **The config.** Write `.pointtoship/config.json` with what you decided:
-   the allowed paths, the checks, how to start the site, previews and the
-   mode. The format is in
+1. **The shared code.** Copy `assets/lib/` to `.pointtoship/lib/` in the
+   repository.
+2. **The method and the doctor.** Copy `assets/skills/pointtoship-method/` and
+   `assets/skills/pointtoship-doctor/` to `.pointtoship/skills/`. The runner
+   points the agent at the method there, so it works with every agent. Also
+   copy them into the skills folder the owner's agent reads, so they can run
+   the doctor by asking.
+3. **The config.** Write `.pointtoship/config.json` with what you decided. The
+   format is in
    [run-files.md](assets/skills/pointtoship-method/references/run-files.md).
-   Add `.pointtoship/notes.md` with anything the agent needs to know that the
-   code does not say, such as where content comes from.
-6. **The secret link.** Generate it and keep it out of the repository.
-
-Follow the project's own rules from step 1 for branches, commits and
-reviews.
+   Add `.pointtoship/notes.md` with what the agent needs to know that the code
+   does not say: where content comes from, words that must stay, who to ask.
+4. **The function.** Copy the template from `assets/hosts/` for this
+   framework or host and fix its import path. Set its environment variables on
+   the host (`assets/hosts/README.md`); generate `PTS_SECRET` with
+   `node -e "console.log(require('node:crypto').randomBytes(24).toString('base64url'))"`.
+   Tokens the owner must create: say exactly where, one at a time, and wait.
+5. **The loader.** Put `assets/overlay/loader.html` in the head of every page
+   ([hosts](references/hosts.md) says where for each framework). Set
+   `ENDPOINT`; keep `SCRIPT` on the pinned CDN copy unless the site's
+   Content-Security-Policy or the owner prefers a copy on the site.
+6. **The runner.** Copy the CI file from `assets/ci/` (or set up the
+   computer service) and its secrets. Install the agent as a standalone
+   command, never a desktop app's bundled copy.
+7. **Labels and health.** Run `node .pointtoship/lib/pointtoship-runner.mjs
+   --setup` with the runner's token. It creates the labels and says what is
+   still missing. Fix everything it lists.
+8. **Commit** the PointToShip files following the project's own rules for
+   branches and reviews, and let it deploy.
 
 ## 5. Prove it
 
-Send one test comment through the whole loop: from the page, to an issue,
-through the runner and the agent, to a deploy, and back to the page as
-Done with a working Show link. If any step fails, fix it or tell the user
-exactly what is missing. Never report success without this run.
+Send one test comment through the whole loop before you call it done:
+
+1. Open the live site with the secret link in a browser you can drive (or
+   call the function directly: `register` with the secret, then `send`).
+2. Send: "PointToShip test from the installer: change nothing and report that
+   the loop works."
+3. Watch the issue go from Queued through Working to Done, with the agent's
+   note on it.
+4. Close the test browser's device issue if it was not the owner's.
+
+If any step fails, fix it or tell the owner exactly what is missing. Never
+report success without this run.
 
 ## 6. Report in a few lines
 
